@@ -1,15 +1,18 @@
 data_folder = "Data/"
+output_folder = "Output/"
+
 loc_folders = ["passive_data_loc_05may2017", "passive_data_loc_6jun2017"]
 act_folders = ["processed_activity_05may2017", "processed_activity_6jun2017"]
 loc_raw_files = {}  # folder->list of location files
 act_raw_files = {}  # folder->list of activity files
 
-from os import listdir
-from os.path import isfile, join
+import os
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
 for loc_folder in loc_folders:
-    loc_raw_files[loc_folder] = [f for f in listdir(data_folder + loc_folder) if isfile(join(data_folder + loc_folder, f))]
+    loc_raw_files[loc_folder] = [f for f in os.listdir(data_folder + loc_folder) if os.path.isfile(os.path.join(data_folder + loc_folder, f))]
 for act_folder in act_folders:
-    act_raw_files[act_folder] = [f for f in listdir(data_folder + act_folder) if isfile(join(data_folder + act_folder, f))]
+    act_raw_files[act_folder] = [f for f in os.listdir(data_folder + act_folder) if os.path.isfile(os.path.join(data_folder + act_folder, f))]
 
 
 def get_user_activities(user):
@@ -48,7 +51,7 @@ try:
 
             user_activities = get_user_activities(user)
 
-            with open("Output/" + user + "_loc.csv", 'w') as output_csv:
+            with open(output_folder + user + "_loc.csv", 'w') as output_csv:
                 output_writer = csv.writer(output_csv, delimiter=',', lineterminator="\n")
                 output_cache = []
 

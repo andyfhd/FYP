@@ -1,10 +1,17 @@
+# python modules to install from pip: simplejson
+# 1. to install shapely for Windows, go to https://www.lfd.uci.edu/~gohlke/pythonlibs/#shapely
+# 2. pip install wheel
+# 3. pip install <wheel-file-downloaded>
+
 data_folder = "Data/"
 output_folder = "Output/"
 
 loc_folders = ["passive_data_loc_05may2017", "passive_data_loc_6jun2017"]
 act_folders = ["processed_activity_05may2017", "processed_activity_6jun2017"]
+place_list_path = "placelists_from_SUTD/finalPlaceList.json"    # need to wrap raw file with []
 loc_raw_files = {}  # folder->list of location files
 act_raw_files = {}  # folder->list of activity files
+finalPlaceList = []  # POI list
 
 import os
 if not os.path.exists(output_folder):
@@ -13,6 +20,19 @@ for loc_folder in loc_folders:
     loc_raw_files[loc_folder] = [f for f in os.listdir(data_folder + loc_folder) if os.path.isfile(os.path.join(data_folder + loc_folder, f))]
 for act_folder in act_folders:
     act_raw_files[act_folder] = [f for f in os.listdir(data_folder + act_folder) if os.path.isfile(os.path.join(data_folder + act_folder, f))]
+
+import simplejson as json
+from shapely.geometry import shape, Point
+from shapely.geometry.polygon import Polygon
+from shapely import geometry
+
+# load locations into memory
+json_data = open(data_folder + place_list_path).read()
+finalPlaceList = json.loads(json_data)
+
+for geo_list in finalPlaceList:
+    polygon = geometry.Polygon(geo_list['geometry']['coordinates'][0])
+    geo_list['polygon'] = polygon
 
 
 def get_user_activities(user):
@@ -62,8 +82,22 @@ try:
                             location_reader = csv.reader(location_csv, delimiter='\t')
 
                             for location_row in location_reader:  # input location row loop
-                                # 0.userid  1.gender  2.age group  3.date  4.time  5.longitude  6.latitude
-                                output_cache.append([location_row[0], gender, age_group, location_row[1], location_row[2], location_row[5], location_row[6]])
+                                hit_regions = []
+                                for geo_list in finalPlaceList:
+                                    if geo_list['polygon'].contains(Point(float(location_row[5]), float(location_row[6]))):
+                                        hit_regions.append(geo_list)
+
+                                if len(hit_regions) == 0:
+                                    place_name = "U"
+                                    category = "U"
+                                    parent_category = "U"
+                                else:   # TODO: when multiple regions are hit, find the closest
+                                    place_name = hit_regions[0]["properties"]["placeName"]
+                                    category = hit_regions[0]["properties"]["category"]
+                                    parent_category = hit_regions[0]["properties"]["parentCategory"]
+
+                                # 0.userid  1.gender  2.age group  3.date  4.time  5.longitude  6.latitude  #7.place name  #8.category  #9.parent category
+                                output_cache.append([location_row[0], gender, age_group, location_row[1], location_row[2], location_row[5], location_row[6], place_name, category, parent_category])
 
                 if len(output_cache) > 0:
                     output_cache.sort(key=lambda x: (x[3], x[4]))
@@ -81,7 +115,7 @@ try:
                             for key, group in groupby(current_activities, key=lambda x: x[1]):
                                 act_breakdown[key] = len(list(group))/len(current_activities)
 
-                            # 7.weight  8.type I frequency  9.type II frequency  10.type III frequency
+                            # 10.weight  11.type I frequency  12.type II frequency  13.type III frequency
                             output_writer.writerow(output_row + [len(current_activities), act_breakdown['1'], act_breakdown['2'], act_breakdown['3']])
                         previous_row = output_row
 except Exception as err:

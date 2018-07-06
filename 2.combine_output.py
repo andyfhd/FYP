@@ -17,7 +17,7 @@ try:
             for row in output_reader:
                 combine_cache.append(row)
 
-    combine_cache.sort(key=lambda x: (x[3], x[4]))
+    combine_cache.sort(key=lambda x: (x[6], x[7]))
 
     with open(combine_folder + combine_file, 'w') as combine_csv:
         output_writer = csv.writer(combine_csv, delimiter=',', lineterminator="\n")

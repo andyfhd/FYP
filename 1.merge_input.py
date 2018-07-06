@@ -86,15 +86,15 @@ try:
                                 output_cache.append([location_row[0], gender, age_group, app_version, family_id, family[family_id], location_row[1], location_row[2], location_row[5], location_row[6]])
 
                 if len(output_cache) > 0:
-                    output_cache.sort(key=lambda x: (x[3], x[4]))
+                    output_cache.sort(key=lambda x: (x[6], x[7]))
 
                     previous_row = []
                     for output_row in output_cache:
-                        if len(previous_row) == 0 or output_row[3] != previous_row[3]:    # ignore first record for each new day
+                        if len(previous_row) == 0 or output_row[6] != previous_row[6]:    # ignore first record for each new day
                             previous_row = output_row
                             continue
-                        day_activities = user_activities[output_row[3]] if output_row[3] in user_activities else []
-                        current_activities = [t for t in day_activities if t[0] > previous_row[4] and t[0] < output_row[4]]
+                        day_activities = user_activities[output_row[6]] if output_row[6] in user_activities else []
+                        current_activities = [t for t in day_activities if t[0] > previous_row[7] and t[0] < output_row[7]]
                         if len(current_activities) > 0:
                             from itertools import groupby
                             act_breakdown = {'1': 0, '2': 0, '3': 0}

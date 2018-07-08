@@ -51,7 +51,7 @@ try:
 
             hit_regions = []
             for geo_list in finalPlaceList:
-                if geo_list['polygon'].contains(Point(float(row[5]), float(row[6]))):
+                if geo_list['polygon'].contains(Point(float(row[8]), float(row[9]))):
                     hit_regions.append(geo_list)
 
             if len(hit_regions) == 0:
@@ -65,7 +65,7 @@ try:
 
             hit_clusters = []
             for geo_list in clusterList:
-                if geo_list['polygon'].contains(Point(float(row[5]), float(row[6]))):
+                if geo_list['polygon'].contains(Point(float(row[8]), float(row[9]))):
                     hit_clusters.append(geo_list)
 
             if len(hit_clusters) == 0:
@@ -85,7 +85,7 @@ try:
     with open(combine_folder + enrich_file, 'w') as enrich_csv:
         enrich_writer = csv.writer(enrich_csv, delimiter=',', lineterminator="\n")
         enrich_writer.writerow(['userid', 'gender', 'age group', 'app version', 'family ID', 'family size', 'date', 'time',
-                                'longitude', 'latitude', 'weight', 'type I frequency', 'type II frequency', 'type II frequency',
+                                'longitude', 'latitude', 'weight', 'type I frequency', 'type II frequency', 'type III frequency',
                                 'old place name', 'old category', 'old parent category', 'cluster ID', 'cluster name', 'radius'])
         for row in enrich_cache:
             enrich_writer.writerow(row)

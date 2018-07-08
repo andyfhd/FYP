@@ -29,7 +29,7 @@ def get_user_activities(user):
                 with open(data_folder + activity_folder + "/" + activity_filename, 'r') as activity_csv:
                     activity_reader = csv.reader(activity_csv, delimiter=',')
 
-                    for activity_row in activity_reader:    # 0.date  1.time  2.activity
+                    for activity_row in activity_reader:    # 0.time  1.activity
                         if activity_date not in activities:
                             activities[activity_date] = []
 
@@ -49,9 +49,8 @@ with open(data_folder + 'User_Demographics_20180522.csv', 'r') as user_csv:
             family[family_id] = 0
         else:
             family[family_id] = family[family_id] + 1
-    
-    family['NULL'] = 0
 
+    family['NULL'] = 0
 
 
 import traceback
@@ -94,13 +93,13 @@ try:
                             previous_row = output_row
                             continue
                         day_activities = user_activities[output_row[6]] if output_row[6] in user_activities else []
-                        current_activities = [t for t in day_activities if t[0] > previous_row[7] and t[0] < output_row[7]]
+                        current_activities = sorted([t[1] for t in day_activities if t[0] > previous_row[7] and t[0] < output_row[7]])
                         if len(current_activities) > 0:
                             from itertools import groupby
                             act_breakdown = {'1': 0, '2': 0, '3': 0}
-                            for key, group in groupby(current_activities, key=lambda x: x[1]):
+                            for key, group in groupby(current_activities):
                                 act_breakdown[key] = len(list(group))/len(current_activities)
-
+                           
                             # 10.weight  11.type I frequency  12.type II frequency  13.type III frequency
                             output_writer.writerow(output_row + [len(current_activities), act_breakdown['1'], act_breakdown['2'], act_breakdown['3']])
                         previous_row = output_row
